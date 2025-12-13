@@ -148,13 +148,13 @@ struct ContentView: View {
                             }
                             
                             // Output Text
-                            ScrollView {
+                            Group {
                                 if interpretation.isEmpty {
                                     Text(languageManager.localizedString("output_placeholder"))
                                         .foregroundStyle(.gray)
                                         .multilineTextAlignment(.center)
                                         .frame(maxWidth: .infinity, alignment: .center)
-                                        .padding(.top, 40)
+                                        .padding(.vertical, 40)
                                 } else {
                                     // Use AttributedString for Markdown rendering
                                     if let attributedString = try? AttributedString(markdown: interpretation, options: AttributedString.MarkdownParsingOptions(interpretedSyntax: .inlineOnlyPreservingWhitespace)) {
@@ -170,7 +170,6 @@ struct ContentView: View {
                                     }
                                 }
                             }
-                            .frame(height: 200)
                             .padding(12)
                             .background(Color.black.opacity(0.2))
                             .cornerRadius(8)
