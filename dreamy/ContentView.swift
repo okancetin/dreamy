@@ -32,53 +32,49 @@ struct ContentView: View {
     
     var body: some View {
         if isSignedIn {
-        TabView(selection: $selectedTab) {
-            // 1. Home (Store)
-            StoreView()
-                .tabItem {
-                    Label(languageManager.localizedString("tab_home"), systemImage: "house")
+            TabView(selection: $selectedTab) {
+                // 1. Home (Store)
+                StoreView()
+                    .tabItem {
+                        Label(languageManager.localizedString("tab_home"), systemImage: "house")
+                    }
+                    .tag(0)
+                
+                // 2. Explore (Placeholder)
+                ZStack {
+                    appBackground.ignoresSafeArea()
+                    Text(languageManager.localizedString("tab_explore"))
+                        .foregroundStyle(.white)
                 }
-                .tag(0)
-            
-            // 2. Explore (Placeholder)
-            ZStack {
-                appBackground.ignoresSafeArea()
-                Text(languageManager.localizedString("tab_explore"))
-                    .foregroundStyle(.white)
-            }
-            .tabItem {
-                Label(languageManager.localizedString("tab_explore"), systemImage: "safari")
-            }
-            .tag(1)
-            
-            // 3. Sleep (Main Functionality)
-            SleepView()
                 .tabItem {
-                    Label(languageManager.localizedString("tab_sleep"), systemImage: "moon.stars.fill")
+                    Label(languageManager.localizedString("tab_explore"), systemImage: "safari")
                 }
-                .tag(2)
-            
-            // 4. Favorites (Placeholder)
-            ZStack {
-                appBackground.ignoresSafeArea()
-                Text(languageManager.localizedString("tab_favorites"))
-                    .foregroundStyle(.white)
-            }
-            .tabItem {
-                Label(languageManager.localizedString("tab_favorites"), systemImage: "heart")
-            }
-            .tag(3)
-            
-            // 5. Profile (Placeholder)
-            ZStack {
-                appBackground.ignoresSafeArea()
-                Text(languageManager.localizedString("tab_profile"))
-                    .foregroundStyle(.white)
-            }
-            .tabItem {
-                Label(languageManager.localizedString("tab_profile"), systemImage: "person")
-            }
-            .tag(4)
+                .tag(1)
+                
+                // 3. Sleep (Main Functionality)
+                SleepView()
+                    .tabItem {
+                        Label(languageManager.localizedString("tab_sleep"), systemImage: "moon.stars.fill")
+                    }
+                    .tag(2)
+                
+                // 4. Favorites (Placeholder)
+                ZStack {
+                    appBackground.ignoresSafeArea()
+                    Text(languageManager.localizedString("tab_favorites"))
+                        .foregroundStyle(.white)
+                }
+                .tabItem {
+                    Label(languageManager.localizedString("tab_favorites"), systemImage: "heart")
+                }
+                .tag(3)
+                
+                // 5. Profile
+                ProfileView(isSignedIn: $isSignedIn)
+                    .tabItem {
+                        Label(languageManager.localizedString("tab_profile"), systemImage: "person")
+                    }
+                    .tag(4)
             }
             .environmentObject(languageManager)
             .accentColor(accentPurple)
@@ -87,6 +83,41 @@ struct ContentView: View {
             LoginView(isSignedIn: $isSignedIn)
                 .environmentObject(languageManager)
                 .preferredColorScheme(.dark)
+        }
+    }
+}
+
+struct ProfileView: View {
+    @Binding var isSignedIn: Bool
+    @EnvironmentObject var languageManager: LanguageManager
+    
+    var body: some View {
+        ZStack {
+            Color(red: 10/255, green: 5/255, blue: 30/255).ignoresSafeArea()
+            
+            VStack(spacing: 20) {
+                Text(languageManager.localizedString("tab_profile"))
+                    .font(.largeTitle)
+                    .foregroundStyle(.white)
+                
+                Button(action: {
+                    // Clear state
+                    UserDefaults.standard.removeObject(forKey: "siwa_token")
+                    // Sign out
+                    withAnimation {
+                        isSignedIn = false
+                    }
+                }) {
+                    Text("Sign Out")
+                        .font(.headline)
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 50)
+                        .background(Color.red.opacity(0.8))
+                        .cornerRadius(10)
+                }
+                .padding(.horizontal, 40)
+            }
         }
     }
 }

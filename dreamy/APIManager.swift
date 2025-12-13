@@ -36,6 +36,11 @@ class APIManager {
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
+        // Include SIWA Token if available
+        if let token = UserDefaults.standard.string(forKey: "siwa_token") {
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
+        
         let payload = DreamRequest(prompt: prompt)
         
         do {
