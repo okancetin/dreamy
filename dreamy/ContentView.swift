@@ -9,6 +9,8 @@ import SwiftUI
 
 struct ContentView: View {
     @StateObject private var languageManager = LanguageManager()
+    @AppStorage("isSignedIn") private var isSignedIn = false
+    @State private var selectedTab = 2
     
     // Custom Colors
     let appBackground = Color(red: 10/255, green: 5/255, blue: 30/255) // Deep dark purple
@@ -29,13 +31,20 @@ struct ContentView: View {
     }
     
     var body: some View {
-        TabView {
-            HomeView()
-                .tabItem {
-                    Label(languageManager.localizedString("tab_home"), systemImage: "house")
-                }
+        if isSignedIn {
+            TabView(selection: $selectedTab) {
+                // 1. Home (Placeholder)
+            ZStack {
+                appBackground.ignoresSafeArea()
+                Text(languageManager.localizedString("tab_home"))
+                    .foregroundStyle(.white)
+            }
+            .tabItem {
+                Label(languageManager.localizedString("tab_home"), systemImage: "house")
+            }
+            .tag(0)
             
-            // Placeholder Views for other tabs
+            // 2. Explore (Placeholder)
             ZStack {
                 appBackground.ignoresSafeArea()
                 Text(languageManager.localizedString("tab_explore"))
@@ -44,16 +53,16 @@ struct ContentView: View {
             .tabItem {
                 Label(languageManager.localizedString("tab_explore"), systemImage: "safari")
             }
+            .tag(1)
             
-            ZStack {
-                appBackground.ignoresSafeArea()
-                Text(languageManager.localizedString("tab_sleep"))
-                    .foregroundStyle(.white)
-            }
-            .tabItem {
-                Label(languageManager.localizedString("tab_sleep"), systemImage: "moon.stars.fill")
-            }
+            // 3. Sleep (Main Functionality)
+            SleepView()
+                .tabItem {
+                    Label(languageManager.localizedString("tab_sleep"), systemImage: "moon.stars.fill")
+                }
+                .tag(2)
             
+            // 4. Favorites (Placeholder)
             ZStack {
                 appBackground.ignoresSafeArea()
                 Text(languageManager.localizedString("tab_favorites"))
@@ -62,7 +71,9 @@ struct ContentView: View {
             .tabItem {
                 Label(languageManager.localizedString("tab_favorites"), systemImage: "heart")
             }
+            .tag(3)
             
+            // 5. Profile (Placeholder)
             ZStack {
                 appBackground.ignoresSafeArea()
                 Text(languageManager.localizedString("tab_profile"))
@@ -71,14 +82,21 @@ struct ContentView: View {
             .tabItem {
                 Label(languageManager.localizedString("tab_profile"), systemImage: "person")
             }
+            .tag(4)
+            }
+            .environmentObject(languageManager)
+            .accentColor(accentPurple)
+            .preferredColorScheme(.dark)
+        } else {
+            LoginView(isSignedIn: $isSignedIn)
+                .environmentObject(languageManager)
+                .preferredColorScheme(.dark)
         }
-        .environmentObject(languageManager)
-        .accentColor(accentPurple)
-        .preferredColorScheme(.dark)
     }
 }
 
-struct HomeView: View {
+// Renamed from HomeView to SleepView
+struct SleepView: View {
     // MARK: - Environment & State
     @EnvironmentObject var languageManager: LanguageManager
     @State private var dreamInput: String = ""
