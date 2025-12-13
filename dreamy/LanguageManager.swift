@@ -59,7 +59,12 @@ class LanguageManager: ObservableObject {
             "dream_interpretation": "Dream Interpretation",
             "output_placeholder": "Write your dream and tap Analyze.",
             "simulated_response": "This dream suggests that you are exploring new creative possibilities. The symbols indicate a desire for freedom and expression in your waking life.",
-            "analyzing": "Analyzing..."
+            "analyzing": "Analyzing...",
+            "tab_home": "Home",
+            "tab_explore": "Explore",
+            "tab_sleep": "Sleep",
+            "tab_favorites": "Favorites",
+            "tab_profile": "Profile"
         ],
         .turkish: [
             "tell_your_dream": "Rüyanı Anlat",
@@ -68,7 +73,12 @@ class LanguageManager: ObservableObject {
             "dream_interpretation": "Rüya Yorumu",
             "output_placeholder": "Rüyanı yaz ve Analiz Et'e dokun.",
             "simulated_response": "Bu rüya yeni yaratıcı olasılıkları keşfettiğinizi gösterir. Semboller, uyanık yaşamınızda özgürlük ve ifade arzusuna işaret ediyor.",
-            "analyzing": "Analiz ediliyor..."
+            "analyzing": "Analiz ediliyor...",
+            "tab_home": "Ana Sayfa",
+            "tab_explore": "Keşfet",
+            "tab_sleep": "Uyku",
+            "tab_favorites": "Favoriler",
+            "tab_profile": "Profil"
         ],
         .german: [
             "tell_your_dream": "Erzähl deinen Traum",
@@ -77,7 +87,12 @@ class LanguageManager: ObservableObject {
             "dream_interpretation": "Traumdeutung",
             "output_placeholder": "Schreibe deinen Traum und tippe auf Analysieren.",
             "simulated_response": "Dieser Traum deutet darauf hin, dass Sie neue kreative Möglichkeiten erkunden. Die Symbole weisen auf einen Wunsch nach Freiheit und Ausdruck in Ihrem Wachleben hin.",
-            "analyzing": "Analysieren..."
+            "analyzing": "Analysieren...",
+            "tab_home": "Startseite",
+            "tab_explore": "Entdecken",
+            "tab_sleep": "Schlaf",
+            "tab_favorites": "Favoriten",
+            "tab_profile": "Profil"
         ]
     ]
 }

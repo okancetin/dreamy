@@ -8,8 +8,79 @@
 import SwiftUI
 
 struct ContentView: View {
-    // MARK: - State Properties
     @StateObject private var languageManager = LanguageManager()
+    
+    // Custom Colors
+    let appBackground = Color(red: 10/255, green: 5/255, blue: 30/255) // Deep dark purple
+    let accentPurple = Color(red: 140/255, green: 80/255, blue: 250/255)
+    
+    init() {
+        // Customize Tab Bar Appearance to match the dark theme
+        let appearance = UITabBarAppearance()
+        appearance.configureWithOpaqueBackground()
+        appearance.backgroundColor = UIColor(red: 10/255, green: 5/255, blue: 30/255, alpha: 1.0)
+        
+        // Unselected icon color
+        appearance.stackedLayoutAppearance.normal.iconColor = UIColor.lightGray
+        appearance.stackedLayoutAppearance.normal.titleTextAttributes = [.foregroundColor: UIColor.lightGray]
+        
+        UITabBar.appearance().standardAppearance = appearance
+        UITabBar.appearance().scrollEdgeAppearance = appearance
+    }
+    
+    var body: some View {
+        TabView {
+            HomeView()
+                .tabItem {
+                    Label(languageManager.localizedString("tab_home"), systemImage: "house")
+                }
+            
+            // Placeholder Views for other tabs
+            ZStack {
+                appBackground.ignoresSafeArea()
+                Text(languageManager.localizedString("tab_explore"))
+                    .foregroundStyle(.white)
+            }
+            .tabItem {
+                Label(languageManager.localizedString("tab_explore"), systemImage: "safari")
+            }
+            
+            ZStack {
+                appBackground.ignoresSafeArea()
+                Text(languageManager.localizedString("tab_sleep"))
+                    .foregroundStyle(.white)
+            }
+            .tabItem {
+                Label(languageManager.localizedString("tab_sleep"), systemImage: "moon.stars.fill")
+            }
+            
+            ZStack {
+                appBackground.ignoresSafeArea()
+                Text(languageManager.localizedString("tab_favorites"))
+                    .foregroundStyle(.white)
+            }
+            .tabItem {
+                Label(languageManager.localizedString("tab_favorites"), systemImage: "heart")
+            }
+            
+            ZStack {
+                appBackground.ignoresSafeArea()
+                Text(languageManager.localizedString("tab_profile"))
+                    .foregroundStyle(.white)
+            }
+            .tabItem {
+                Label(languageManager.localizedString("tab_profile"), systemImage: "person")
+            }
+        }
+        .environmentObject(languageManager)
+        .accentColor(accentPurple)
+        .preferredColorScheme(.dark)
+    }
+}
+
+struct HomeView: View {
+    // MARK: - Environment & State
+    @EnvironmentObject var languageManager: LanguageManager
     @State private var dreamInput: String = ""
     @State private var interpretation: String = ""
     @State private var isAnalyzing: Bool = false
@@ -186,7 +257,6 @@ struct ContentView: View {
                 }
             }
         }
-        .preferredColorScheme(.dark)
     }
     
     func analyzeDream() {
