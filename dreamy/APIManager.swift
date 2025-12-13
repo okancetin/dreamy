@@ -7,11 +7,11 @@
 
 import Foundation
 
-struct DreamRequest: Codable {
+struct DreamRequest: Codable, Sendable {
     let prompt: String
 }
 
-struct DreamResponse: Codable {
+struct DreamResponse: Codable, Sendable {
     let text: String?
     let response: String?
     let reply: String?

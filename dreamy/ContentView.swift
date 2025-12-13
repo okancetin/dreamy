@@ -32,17 +32,13 @@ struct ContentView: View {
     
     var body: some View {
         if isSignedIn {
-            TabView(selection: $selectedTab) {
-                // 1. Home (Placeholder)
-            ZStack {
-                appBackground.ignoresSafeArea()
-                Text(languageManager.localizedString("tab_home"))
-                    .foregroundStyle(.white)
-            }
-            .tabItem {
-                Label(languageManager.localizedString("tab_home"), systemImage: "house")
-            }
-            .tag(0)
+        TabView(selection: $selectedTab) {
+            // 1. Home (Store)
+            StoreView()
+                .tabItem {
+                    Label(languageManager.localizedString("tab_home"), systemImage: "house")
+                }
+                .tag(0)
             
             // 2. Explore (Placeholder)
             ZStack {

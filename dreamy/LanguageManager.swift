@@ -67,7 +67,9 @@ class LanguageManager: ObservableObject {
             "tab_profile": "Profile",
             "welcome": "Welcome to Dreamy",
             "sign_in_subtitle": "Sign in to interpret your dreams",
-            "continue_guest": "Continue as Guest"
+            "continue_guest": "Continue as Guest",
+            "credits": "Credits",
+            "buy": "Buy"
         ],
         .turkish: [
             "tell_your_dream": "Rüyanı Anlat",
@@ -84,7 +86,9 @@ class LanguageManager: ObservableObject {
             "tab_profile": "Profil",
             "welcome": "Dreamy'ye Hoşgeldiniz",
             "sign_in_subtitle": "Rüyalarınızı yorumlamak için giriş yapın",
-            "continue_guest": "Misafir Olarak Devam Et"
+            "continue_guest": "Misafir Olarak Devam Et",
+            "credits": "Kredi",
+            "buy": "Satın Al"
         ],
         .german: [
             "tell_your_dream": "Erzähl deinen Traum",
@@ -101,7 +105,9 @@ class LanguageManager: ObservableObject {
             "tab_profile": "Profil",
             "welcome": "Willkommen bei Dreamy",
             "sign_in_subtitle": "Melden Sie sich an, um Ihre Träume zu deuten",
-            "continue_guest": "Als Gast fortfahren"
+            "continue_guest": "Als Gast fortfahren",
+            "credits": "Guthaben",
+            "buy": "Kaufen"
         ]
     ]
 }
