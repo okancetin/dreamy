@@ -321,27 +321,70 @@ struct SleepView: View {
         // Hide keyboard
         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
         
-        if paymentManager.hasSufficientCredits(cost: 1) {
-            paymentManager.deductCredits(cost: 1)
+        // 1. Check if input is valid
+        guard !dreamInput.isEmpty else { return }
+        
+        isAnalyzing = true
+        interpretation = languageManager.localizedString("analyzing")
+        
+        // 2. Fetch latest credits from backend
+        APIManager.shared.fetchCredits { result in
+            DispatchQueue.main.async {
+                self.handleCreditFetchResult(result)
+            }
+        }
+    }
+    
+    private func handleCreditFetchResult(_ result: Result<Int, Error>) {
+        switch result {
+        case .success(let backendCredits):
+            // Update local manager
+            paymentManager.credits = backendCredits
             
-            isAnalyzing = true
-            interpretation = languageManager.localizedString("analyzing")
-            
-            APIManager.shared.analyzeDream(prompt: dreamInput) { result in
-                DispatchQueue.main.async {
-                    isAnalyzing = false
-                    switch result {
-                    case .success(let text):
-                        interpretation = text
-                    case .failure(let error):
-                        interpretation = "Error: \(error.localizedDescription)"
-                        // Refund credit on error? Optional, but fair.
-                        paymentManager.credits += 1
+            // 3. Check sufficiency
+            if paymentManager.hasSufficientCredits(cost: 1) {
+                // Deduct locally for UI feedback
+                paymentManager.deductCredits(cost: 1)
+                
+                // 4. Call Analyze API
+                APIManager.shared.analyzeDream(prompt: dreamInput) { result in
+                    DispatchQueue.main.async {
+                        self.handleAnalysisResult(result)
                     }
                 }
+            } else {
+                isAnalyzing = false
+                interpretation = "" // Clear "Analyzing..." text
+                showInsufficientCreditsAlert = true
             }
-        } else {
-            showInsufficientCreditsAlert = true
+            
+        case .failure(let error):
+            isAnalyzing = false
+            interpretation = "Error fetching credits: \(error.localizedDescription)"
+        }
+    }
+    
+    private func handleAnalysisResult(_ result: Result<String, Error>) {
+        isAnalyzing = false
+        switch result {
+        case .success(let text):
+            interpretation = text
+        case .failure(let error):
+            // Check for 402 Payment Required
+            if let apiError = error as? APIError, apiError == .paymentRequired {
+                interpretation = "" // Clear text
+                showInsufficientCreditsAlert = true
+                
+                // Refund logic is tricky here:
+                // If the server returned 402, it means it DID NOT deduct credit.
+                // But we deducted 1 credit locally in `handleCreditFetchResult`.
+                // So we MUST refund it locally to keep sync.
+                paymentManager.credits += 1
+            } else {
+                interpretation = "Error: \(error.localizedDescription)"
+                // Refund credit on other errors too
+                paymentManager.credits += 1
+            }
         }
     }
 }
