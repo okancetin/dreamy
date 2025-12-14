@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ContentView: View {
     @StateObject private var languageManager = LanguageManager()
+    @StateObject private var paymentManager = PaymentManager()
     @AppStorage("isSignedIn") private var isSignedIn = false
     @State private var selectedTab = 2
     
@@ -52,7 +53,7 @@ struct ContentView: View {
                 .tag(1)
                 
                 // 3. Sleep (Main Functionality)
-                SleepView()
+                SleepView(selectedTab: $selectedTab)
                     .tabItem {
                         Label(languageManager.localizedString("tab_sleep"), systemImage: "moon.stars.fill")
                     }
@@ -77,6 +78,7 @@ struct ContentView: View {
                     .tag(4)
             }
             .environmentObject(languageManager)
+            .environmentObject(paymentManager)
             .accentColor(accentPurple)
             .preferredColorScheme(.dark)
         } else {
@@ -126,9 +128,12 @@ struct ProfileView: View {
 struct SleepView: View {
     // MARK: - Environment & State
     @EnvironmentObject var languageManager: LanguageManager
+    @EnvironmentObject var paymentManager: PaymentManager
+    @Binding var selectedTab: Int
     @State private var dreamInput: String = ""
     @State private var interpretation: String = ""
     @State private var isAnalyzing: Bool = false
+    @State private var showInsufficientCreditsAlert = false
     
     // MARK: - Constants
     let maxChars = 1000
@@ -302,25 +307,41 @@ struct SleepView: View {
                 }
             }
         }
+        .alert(languageManager.localizedString("credits"), isPresented: $showInsufficientCreditsAlert) {
+            Button(languageManager.localizedString("buy")) {
+                selectedTab = 0 // Go to Store
+            }
+            Button("Cancel", role: .cancel) { }
+        } message: {
+            Text("You need 1 credit to analyze a dream.")
+        }
     }
     
     func analyzeDream() {
         // Hide keyboard
         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
         
-        isAnalyzing = true
-        interpretation = languageManager.localizedString("analyzing")
-        
-        APIManager.shared.analyzeDream(prompt: dreamInput) { result in
-            DispatchQueue.main.async {
-                isAnalyzing = false
-                switch result {
-                case .success(let text):
-                    interpretation = text
-                case .failure(let error):
-                    interpretation = "Error: \(error.localizedDescription)"
+        if paymentManager.hasSufficientCredits(cost: 1) {
+            paymentManager.deductCredits(cost: 1)
+            
+            isAnalyzing = true
+            interpretation = languageManager.localizedString("analyzing")
+            
+            APIManager.shared.analyzeDream(prompt: dreamInput) { result in
+                DispatchQueue.main.async {
+                    isAnalyzing = false
+                    switch result {
+                    case .success(let text):
+                        interpretation = text
+                    case .failure(let error):
+                        interpretation = "Error: \(error.localizedDescription)"
+                        // Refund credit on error? Optional, but fair.
+                        paymentManager.credits += 1
+                    }
                 }
             }
+        } else {
+            showInsufficientCreditsAlert = true
         }
     }
 }
