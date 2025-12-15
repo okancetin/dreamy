@@ -41,17 +41,6 @@ struct ContentView: View {
                     }
                     .tag(0)
                 
-                // 2. Explore (Placeholder)
-                ZStack {
-                    appBackground.ignoresSafeArea()
-                    Text(languageManager.localizedString("tab_explore"))
-                        .foregroundStyle(.white)
-                }
-                .tabItem {
-                    Label(languageManager.localizedString("tab_explore"), systemImage: "safari")
-                }
-                .tag(1)
-                
                 // 3. Sleep (Main Functionality)
                 SleepView(selectedTab: $selectedTab)
                     .tabItem {
@@ -59,16 +48,12 @@ struct ContentView: View {
                     }
                     .tag(2)
                 
-                // 4. Favorites (Placeholder)
-                ZStack {
-                    appBackground.ignoresSafeArea()
-                    Text(languageManager.localizedString("tab_favorites"))
-                        .foregroundStyle(.white)
-                }
-                .tabItem {
-                    Label(languageManager.localizedString("tab_favorites"), systemImage: "heart")
-                }
-                .tag(3)
+                // 4. History
+                HistoryView()
+                    .tabItem {
+                        Label(languageManager.localizedString("tab_history"), systemImage: "clock.arrow.circlepath")
+                    }
+                    .tag(3)
                 
                 // 5. Profile
                 ProfileView(isSignedIn: $isSignedIn)
@@ -81,6 +66,9 @@ struct ContentView: View {
             .environmentObject(paymentManager)
             .accentColor(accentPurple)
             .preferredColorScheme(.dark)
+            .onAppear {
+                selectedTab = 2
+            }
         } else {
             LoginView(isSignedIn: $isSignedIn)
                 .environmentObject(languageManager)

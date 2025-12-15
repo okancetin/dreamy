@@ -27,6 +27,20 @@ struct CreditsResponse: Codable, Sendable {
     let credits_left: Int
 }
 
+struct DreamHistory: Codable, Identifiable, Sendable {
+    var id = UUID()
+    let user_id: String
+    let name: String?
+    let surname: String?
+    let dream: String
+    let analysis: String
+    let created_at: String
+    
+    private enum CodingKeys: String, CodingKey {
+        case user_id, name, surname, dream, analysis, created_at
+    }
+}
+
 enum APIError: Error, Equatable {
     case invalidURL
     case noData
@@ -156,6 +170,40 @@ class APIManager {
                 }
                 
                 completion(.failure(error))
+            }
+        }.resume()
+    }
+
+    func fetchHistory(userID: String, completion: @escaping (Result<[DreamHistory], Error>) -> Void) {
+        guard let url = URL(string: "https://drm-et6t.onrender.com/dream-history/\(userID)") else {
+            completion(.failure(APIError.invalidURL))
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        
+        if let token = UserDefaults.standard.string(forKey: "siwa_token") {
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
+        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+            
+            guard let data = data else {
+                completion(.failure(APIError.noData))
+                return
+            }
+            
+            do {
+                let history = try JSONDecoder().decode([DreamHistory].self, from: data)
+                completion(.success(history))
+            } catch {
+                print("History parsing error: \(error)")
+                completion(.failure(APIError.parsingError))
             }
         }.resume()
     }
