@@ -27,6 +27,18 @@ struct CreditsResponse: Codable, Sendable {
     let credits_left: Int
 }
 
+struct AddCreditRequest: Codable, Sendable {
+    let user_id: String
+    let credit_amount: Int
+    let timestamp: Double
+}
+
+struct AddCreditResponse: Codable, Sendable {
+    let user_id: String
+    let balance: Int
+    let updated_at: String
+}
+
 struct DreamHistory: Codable, Identifiable, Sendable {
     var id = UUID()
     let user_id: String
@@ -54,7 +66,7 @@ class APIManager {
     static let shared = APIManager()
     
     func analyzeDream(prompt: String, completion: @escaping (Result<String, Error>) -> Void) {
-        guard let url = URL(string: "https://drm-et6t.onrender.com/llm-chat") else {
+        guard let url = URL(string: "\(AppConstants.apiBaseURL)/llm-chat") else {
             completion(.failure(APIError.invalidURL))
             return
         }
@@ -129,7 +141,7 @@ class APIManager {
     }
 
     func fetchCredits(completion: @escaping (Result<Int, Error>) -> Void) {
-        guard let url = URL(string: "https://drm-et6t.onrender.com/me/credits") else {
+        guard let url = URL(string: "\(AppConstants.apiBaseURL)/me/credits") else {
             completion(.failure(NSError(domain: "Invalid URL", code: -1, userInfo: nil)))
             return
         }
@@ -175,7 +187,7 @@ class APIManager {
     }
 
     func fetchHistory(userID: String, completion: @escaping (Result<[DreamHistory], Error>) -> Void) {
-        guard let url = URL(string: "https://drm-et6t.onrender.com/dream-history/\(userID)") else {
+        guard let url = URL(string: "\(AppConstants.apiBaseURL)/dream-history/\(userID)") else {
             completion(.failure(APIError.invalidURL))
             return
         }
@@ -204,6 +216,88 @@ class APIManager {
             } catch {
                 print("History parsing error: \(error)")
                 completion(.failure(APIError.parsingError))
+            }
+        }.resume()
+    }
+    
+    func addCredit(userID: String, creditAmount: Int, timestamp: Double, completion: @escaping (Result<AddCreditResponse, Error>) -> Void) {
+        guard let url = URL(string: "\(AppConstants.apiBaseURL)/add-credit") else {
+            completion(.failure(APIError.invalidURL))
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        // Include SIWA Token
+        if let token = UserDefaults.standard.string(forKey: "siwa_token") {
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
+        
+        let payload = AddCreditRequest(user_id: userID, credit_amount: creditAmount, timestamp: timestamp)
+        
+        do {
+            request.httpBody = try JSONEncoder().encode(payload)
+        } catch {
+            completion(.failure(error))
+            return
+        }
+        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+            
+            guard let httpResponse = response as? HTTPURLResponse else {
+                completion(.failure(APIError.serverError(statusCode: 0)))
+                return
+            }
+            
+            guard (200...299).contains(httpResponse.statusCode) else {
+                completion(.failure(APIError.serverError(statusCode: httpResponse.statusCode)))
+                return
+            }
+            
+            guard let data = data else {
+                completion(.failure(APIError.noData))
+                return
+            }
+            
+            do {
+                let decoded = try JSONDecoder().decode(AddCreditResponse.self, from: data)
+                completion(.success(decoded))
+            } catch {
+                print("AddCredit JSON decode failed: \(error)")
+                completion(.failure(APIError.parsingError))
+            }
+        }.resume()
+    }
+    
+    func deleteAccount(completion: @escaping (Result<Void, Error>) -> Void) {
+        guard let url = URL(string: "\(AppConstants.apiBaseURL)/me") else {
+            completion(.failure(APIError.invalidURL))
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "DELETE"
+        
+        if let token = UserDefaults.standard.string(forKey: "siwa_token") {
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
+        
+        URLSession.shared.dataTask(with: request) { _, response, error in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+            
+            if let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) {
+                completion(.success(()))
+            } else {
+                completion(.failure(APIError.serverError(statusCode: (response as? HTTPURLResponse)?.statusCode ?? 500)))
             }
         }.resume()
     }

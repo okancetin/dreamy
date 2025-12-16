@@ -80,6 +80,9 @@ struct ContentView: View {
 struct ProfileView: View {
     @Binding var isSignedIn: Bool
     @EnvironmentObject var languageManager: LanguageManager
+    @State private var showDeleteConfirmation = false
+    @State private var isDeleting = false
+    @State private var errorMessage: String?
     
     var body: some View {
         ZStack {
@@ -89,24 +92,97 @@ struct ProfileView: View {
                 Text(languageManager.localizedString("tab_profile"))
                     .font(.largeTitle)
                     .foregroundStyle(.white)
+                    .padding(.top, 40)
                 
-                Button(action: {
-                    // Clear state
-                    UserDefaults.standard.removeObject(forKey: "siwa_token")
-                    // Sign out
-                    withAnimation {
-                        isSignedIn = false
+                Spacer()
+                
+                VStack(spacing: 15) {
+                    // Sign Out Button
+                    Button(action: {
+                        signOut()
+                    }) {
+                        Text("Sign Out")
+                            .font(.headline)
+                            .foregroundStyle(.white)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 50)
+                            .background(Color.gray.opacity(0.3))
+                            .cornerRadius(10)
                     }
-                }) {
-                    Text("Sign Out")
-                        .font(.headline)
-                        .foregroundStyle(.white)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 50)
-                        .background(Color.red.opacity(0.8))
-                        .cornerRadius(10)
+                    
+                    // Delete Account Button
+                    Button(action: {
+                        showDeleteConfirmation = true
+                    }) {
+                        if isDeleting {
+                            ProgressView()
+                                .tint(.white)
+                        } else {
+                            Text("Delete Account")
+                                .font(.headline)
+                                .foregroundStyle(.white)
+                        }
+                    }
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 50)
+                    .background(Color.red.opacity(0.8))
+                    .cornerRadius(10)
                 }
                 .padding(.horizontal, 40)
+                
+                if let errorMessage = errorMessage {
+                    Text(errorMessage)
+                        .font(.caption)
+                        .foregroundStyle(.red)
+                        .padding()
+                }
+                
+                Spacer()
+                
+                // Terms and Privacy (Required for Account Management)
+                VStack(spacing: 5) {
+                    Link("Terms of Use", destination: AppConstants.termsOfUseURL)
+                    Link("Privacy Policy", destination: AppConstants.privacyPolicyURL)
+                }
+                .font(.caption)
+                .foregroundStyle(.gray)
+                .padding(.bottom, 20)
+            }
+        }
+        .alert("Delete Account", isPresented: $showDeleteConfirmation) {
+            Button("Cancel", role: .cancel) { }
+            Button("Delete", role: .destructive) {
+                deleteAccount()
+            }
+        } message: {
+            Text("Are you sure you want to delete your account? This action cannot be undone and you will lose all your credits and history.")
+        }
+    }
+    
+    private func signOut() {
+        // Clear state
+        UserDefaults.standard.removeObject(forKey: "siwa_token")
+        UserDefaults.standard.removeObject(forKey: "user_id")
+        // Sign out
+        withAnimation {
+            isSignedIn = false
+        }
+    }
+    
+    private func deleteAccount() {
+        isDeleting = true
+        APIManager.shared.deleteAccount { result in
+            DispatchQueue.main.async {
+                isDeleting = false
+                switch result {
+                case .success:
+                    signOut()
+                case .failure(let error):
+                    // For now, if the API fails (e.g. 404 endpoint not found), we might still want to sign out locally
+                    // strictly speaking we should show error, but if backend isn't ready, user is stuck.
+                    // Let's show error.
+                    errorMessage = "Failed to delete account: \(error.localizedDescription)"
+                }
             }
         }
     }

@@ -69,7 +69,8 @@ class LanguageManager: ObservableObject {
             "sign_in_subtitle": "Sign in to interpret your dreams",
             "continue_guest": "Continue as Guest",
             "credits": "Credits",
-            "buy": "Buy"
+            "buy": "Buy",
+            "restore_purchases": "Restore Purchases"
         ],
         .turkish: [
             "tell_your_dream": "Rüyanı Anlat",
@@ -88,7 +89,8 @@ class LanguageManager: ObservableObject {
             "sign_in_subtitle": "Rüyalarınızı yorumlamak için giriş yapın",
             "continue_guest": "Misafir Olarak Devam Et",
             "credits": "Kredi",
-            "buy": "Satın Al"
+            "buy": "Satın Al",
+            "restore_purchases": "Satın Alımları Geri Yükle"
         ],
         .german: [
             "tell_your_dream": "Erzähl deinen Traum",
@@ -107,7 +109,8 @@ class LanguageManager: ObservableObject {
             "sign_in_subtitle": "Melden Sie sich an, um Ihre Träume zu deuten",
             "continue_guest": "Als Gast fortfahren",
             "credits": "Guthaben",
-            "buy": "Kaufen"
+            "buy": "Kaufen",
+            "restore_purchases": "Einkäufe wiederherstellen"
         ]
     ]
 }
